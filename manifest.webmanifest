@@ -1,0 +1,23 @@
+{
+    "name": "Социален компас: Робинзон Крузо и AI",
+    "short_name": "Социален компас",
+    "description": "Приложение за балансиране на дигиталното време с физическа активност и социална отговорност.",
+    "theme_color": "#22c55e",
+    "background_color": "#f8f8f8",
+    "display": "standalone",
+    "orientation": "portrait",
+    "scope": "/",
+    "start_url": "index.html",
+    "icons": [
+        {
+            "src": "icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
