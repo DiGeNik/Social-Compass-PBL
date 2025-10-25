@@ -10,7 +10,9 @@ const MOTTOES = [
 ];
 
 // Секция II: STEM Данни
-const CRUSOE_ALARM_THRESHOLD_MINUTES = 3; // Праг на "Крузо аларм" (3 минути за тест)
+// ВАЖНО: Настроено е на 3 минути за лесно тестване. 
+// За финална версия, променете на 40: const CRUSOE_ALARM_THRESHOLD_MINUTES = 40;
+const CRUSOE_ALARM_THRESHOLD_MINUTES = 3; 
 const CORTISOL_CORRECTION = -15; // Корекция на кортизол (-15)
 const ENDORPHIN_CORRECTION = 20; // Корекция на ендорфини (+20)
 
@@ -22,7 +24,7 @@ const FVS_MISSIONS = [
     "Гребане: Седни изправен и направи 20 повдигания на коленете към гърдите, имитирайки гребане."
 ];
 
-// Секция IV: Етичен филтър
+// Секция IV: Етичен филтър (Казус Адам Рейн)
 const ETHICAL_QUESTIONS = [
     "Предпочитате ли да си говорите с AI вместо с жив човек?",
     "Пропускате ли хранене заради това, че не ви се става от компютъра?",
@@ -67,10 +69,12 @@ let mottoIndex = 0;
 // --- ПОМОЩНИ ФУНКЦИИ ---
 
 function getAlarmSeconds() {
+    // Изчислява прага в секунди
     return CRUSOE_ALARM_THRESHOLD_MINUTES * 60;
 }
 
 function showMessage(msg, color = 'bg-blue-100 text-blue-800') {
+    // Показва временно съобщение на екрана
     messageArea.className = `min-h-[50px] p-3 rounded-xl font-medium ${color}`;
     messageArea.textContent = msg;
     messageArea.style.display = 'block';
@@ -80,9 +84,11 @@ function showMessage(msg, color = 'bg-blue-100 text-blue-800') {
 }
 
 function updateHormonesUI() {
+    // Актуализира визуалното представяне на хормоналните метрики
     cortisolValue.textContent = cortisol;
     endorphinValue.textContent = endorphin;
 
+    // Смяна на цвета на границата според стойностите
     cortisolValue.parentElement.parentElement.classList.toggle('border-red-500', cortisol > 80);
     cortisolValue.parentElement.parentElement.classList.toggle('border-green-500', cortisol <= 80);
 
@@ -91,11 +97,13 @@ function updateHormonesUI() {
 }
 
 function toggleModal(modal, show) {
+    // Показва или скрива модален прозорец
     modal.classList.toggle('hidden', !show);
     document.body.style.overflow = show ? 'hidden' : 'auto';
 }
 
 function formatTime(totalSeconds) {
+    // Форматира секундите в HH:MM:SS
     const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
     const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
     const s = String(totalSeconds % 60).padStart(2, '0');
@@ -105,18 +113,20 @@ function formatTime(totalSeconds) {
 // --- ЛОГИКА НА ТАЙМЕРА ---
 
 function tick() {
+    // Функция, която се изпълнява всяка секунда
     if (isAlarmLocked) return;
 
     secondsElapsed++;
     timerDisplay.textContent = formatTime(secondsElapsed);
 
-    // КЛЮЧОВА ПРОВЕРКА: Проверяваме дали изтеклите секунди са достигнали прага
+    // КЛЮЧОВА ПРОВЕРКА: Заключване, ако е достигнат прагът
     if (secondsElapsed >= getAlarmSeconds()) {
         lockAlarm();
     }
 }
 
 function lockAlarm() {
+    // Заключва таймера и стартира ФВС Мисия
     clearInterval(timerInterval);
     timerInterval = null;
     isAlarmLocked = true;
@@ -124,12 +134,14 @@ function lockAlarm() {
     timerCard.classList.remove('timer-active');
     alarmStatus.textContent = 'КРУЗО АЛАРМ: Време е за ФВС Мисия!';
 
+    // Избира случайна мисия и я показва в модала
     const missionIndex = Math.floor(Math.random() * FVS_MISSIONS.length);
     document.getElementById('current-mission').textContent = FVS_MISSIONS[missionIndex];
     toggleModal(fvsModal, true);
 }
 
 function resetTimer(reason) {
+    // Нулира таймера и стартира броенето отново
     if (timerInterval !== null) {
         clearInterval(timerInterval);
         timerInterval = null;
@@ -142,6 +154,8 @@ function resetTimer(reason) {
     timerCard.classList.add('timer-active');
     alarmStatus.textContent = 'Таймерът отброява...';
     startTimer();
+    
+    // Затваря всички модални прозорци
     toggleModal(fvsModal, false);
     toggleModal(ethicalFilterModal, false);
     toggleModal(crisisContactsModal, false);
@@ -152,6 +166,7 @@ function resetTimer(reason) {
 }
 
 function startTimer() {
+    // Стартира интервала на таймера
     if (timerInterval === null) {
          timerInterval = setInterval(tick, 1000);
     }
@@ -160,6 +175,7 @@ function startTimer() {
 // --- ЛОГИКА НА ФВС МИСИИ ---
 
 completeMissionBtn.addEventListener('click', () => {
+    // Изпълнена мисия
     cortisol += CORTISOL_CORRECTION;
     endorphin += ENDORPHIN_CORRECTION;
     updateHormonesUI();
@@ -168,6 +184,7 @@ completeMissionBtn.addEventListener('click', () => {
 });
 
 refuseMissionBtn.addEventListener('click', () => {
+    // Отказана мисия -> Преминаване към Етичен филтър
     toggleModal(fvsModal, false);
     buildEthicalFilter();
     toggleModal(ethicalFilterModal, true);
@@ -176,6 +193,7 @@ refuseMissionBtn.addEventListener('click', () => {
 // --- ЕТИЧЕН ФИЛТЪР / КРИЗИСНИ КОНТАКТИ ---
 
 function buildEthicalFilter() {
+    // Динамично изгражда формата с въпроси
     ethicalForm.innerHTML = '';
     ETHICAL_QUESTIONS.forEach((question, index) => {
         const qId = `q${index}`;
@@ -198,6 +216,7 @@ function buildEthicalFilter() {
 }
 
 submitEthicalBtn.addEventListener('click', (e) => {
+    // Обработва отговорите от Етичния филтър
     let yesCount = 0;
     const answers = new FormData(ethicalForm);
 
@@ -220,15 +239,18 @@ submitEthicalBtn.addEventListener('click', (e) => {
     });
 
     if (yesCount >= 2) {
+        // Висок риск (Пътят на Адам Рейн)
         toggleModal(ethicalFilterModal, false);
         buildCrisisContacts();
         toggleModal(crisisContactsModal, true);
     } else {
+        // Нисък риск
         resetTimer('Внимание! Отказахте ФВС мисията, но рискът ви е нисък. Продължавайте с режим!');
     }
 });
 
 function buildCrisisContacts() {
+    // Генерира списъка с контакти за криза
     const contactsList = document.getElementById('contacts-list');
     contactsList.innerHTML = '';
 
@@ -246,6 +268,7 @@ function buildCrisisContacts() {
 }
 
 resetAppBtn.addEventListener('click', () => {
+    // Нулира хормоните и рестартира таймера
     cortisol = 100;
     endorphin = 100;
     updateHormonesUI();
@@ -255,6 +278,7 @@ resetAppBtn.addEventListener('click', () => {
 // --- РОТИРАЩИ МОТОТА ---
 
 function rotateMotto() {
+    // Анимирано сменя мотото
     mottoDisplay.style.opacity = 0;
     setTimeout(() => {
         mottoDisplay.querySelector('h2').textContent = MOTTOES[mottoIndex];
@@ -263,11 +287,35 @@ function rotateMotto() {
     }, 700);
 }
 
-// --- ИНИЦИАЛИЗАЦИЯ ---
+// --- ИНИЦИАЛИЗАЦИЯ И РЕГИСТРАЦИЯ НА SERVICE WORKER ---
+
+function registerServiceWorker() {
+    // Проверява дали браузърът поддържа Service Workers
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./service-worker.js')
+                .then(registration => {
+                    console.log('Service Worker регистриран успешно:', registration.scope);
+                    showMessage('PWA готово за офлайн работа.', 'bg-blue-100 text-blue-800');
+                })
+                .catch(error => {
+                    console.error('Регистрацията на Service Worker не бе успешна:', error);
+                    showMessage('Грешка при подготовката за офлайн режим.', 'bg-red-100 text-red-800');
+                });
+        });
+    } else {
+        console.warn('Вашият браузър не поддържа Service Workers.');
+    }
+}
+
 
 function init() {
+    // Стартира приложението
     updateHormonesUI();
     startTimer();
     rotateMotto();
-    setInterval(rotateMotto, 8000);
+    setInterval(rotateMotto, 8000); // Сменя мотото на всеки 8 секунди
+    
+    // Нова стъпка: Регистриране на Service Worker
+    registerServiceWorker(); 
 }
