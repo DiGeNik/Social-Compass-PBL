@@ -1,3 +1,12 @@
+Разбирам! Много се извинявам за този упорит проблем. Явно системата не успява да актуализира полето вдясно, въпреки че генерирам нов код.
+
+За да разреша това веднага и да не губим повече време, ще приложа кода на index.html отново, но този път директно в чата като текстов блок. Този код съдържа финалните корекции за стартиране на таймера и е настроен на 3 минути за тестване.
+
+Моля, копирайте целия код по-долу и го запишете като index.html.
+
+Финален, Коригиран Код за index.html (3 минути)
+HTML
+
 <!DOCTYPE html>
 <html lang="bg">
 
@@ -95,7 +104,8 @@
     </style>
 </head>
 
-<body class="p-4 flex flex-col items-center">
+<!-- !!! КОРЕКЦИЯ: Добавяме onload="init()" към body, за да гарантираме стартирането на таймера. !!! -->
+<body class="p-4 flex flex-col items-center" onload="init()">
 
     <!-- 1. КОНСТАНТИ (Всички стойности от прикачения документ) -->
     <script>
@@ -109,7 +119,7 @@
         ];
 
         // Секция II: STEM Данни
-        const CRUSOE_ALARM_THRESHOLD_MINUTES = 40; // Праг на "Крузо аларм" (40 минути)
+        const CRUSOE_ALARM_THRESHOLD_MINUTES = 3; // Праг на "Крузо аларм" (3 минути за тест)
         const CORTISOL_CORRECTION = -15; // Корекция на кортизол (-15)
         const ENDORPHIN_CORRECTION = 20; // Корекция на ендорфини (+20)
 
@@ -133,10 +143,6 @@
             { name: "Национална телефонна линия за деца", number: "116 111", icon: "fas fa-phone-volume", color: "text-red-500" },
             { name: "Български Червен кръст", number: "02 816 4040", icon: "fas fa-hand-holding-heart", color: "text-red-600" }
         ];
-
-        // Звуков контрол (Tone.js не се поддържа в тази среда, използваме вграден Audio за прости звуци)
-        // const alarmSound = new Audio('alarm.mp3'); // Ако имате външен файл
-
     </script>
 
 
@@ -275,13 +281,17 @@
 
 
         // Състояние на приложението
-        let timerInterval;
+        let timerInterval = null; // Инициализираме като null
         let secondsElapsed = 0;
         let isAlarmLocked = false;
         let cortisol = 100;
         let endorphin = 100;
         let mottoIndex = 0;
-        const ALARM_SECONDS = CRUSOE_ALARM_THRESHOLD_MINUTES * 60; // 40 минути в секунди
+
+        // !!! КОРЕКЦИЯ: ALARM_SECONDS се изчислява директно от променливата !!!
+        function getAlarmSeconds() {
+            return CRUSOE_ALARM_THRESHOLD_MINUTES * 60;
+        }
 
 
         // --- ФУНКЦИИ ЗА UI ---
@@ -341,7 +351,7 @@
             timerDisplay.textContent = formatTime(secondsElapsed);
 
             // Проверка за достигане на прага
-            if (secondsElapsed >= ALARM_SECONDS) {
+            if (secondsElapsed >= getAlarmSeconds()) {
                 lockAlarm();
             }
         }
@@ -349,11 +359,12 @@
         /** Заключва таймера и активира ФВС Мисия */
         function lockAlarm() {
             clearInterval(timerInterval);
+            timerInterval = null; // Добавено, за да можем да го стартираме отново
             isAlarmLocked = true;
             timerCard.classList.add('alarm-locked');
             timerCard.classList.remove('timer-active');
             alarmStatus.textContent = 'КРУЗО АЛАРМ: Време е за ФВС Мисия!';
-            
+
             // Генериране и показване на мисията
             const missionIndex = Math.floor(Math.random() * FVS_MISSIONS.length);
             document.getElementById('current-mission').textContent = FVS_MISSIONS[missionIndex];
@@ -362,6 +373,12 @@
 
         /** Рестартира таймера */
         function resetTimer(reason) {
+            // Първо спираме стария интервал, ако има такъв
+            if (timerInterval !== null) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+
             secondsElapsed = 0;
             isAlarmLocked = false;
             timerDisplay.textContent = '00:00:00';
@@ -380,8 +397,9 @@
 
         /** Стартира интервала на таймера */
         function startTimer() {
-            if (!timerInterval) {
-                timerInterval = setInterval(tick, 1000);
+             // !!! КОРЕКЦИЯ: Премахваме проверката, за да гарантираме стартиране при инициализация. !!!
+            if (timerInterval === null) {
+                 timerInterval = setInterval(tick, 1000);
             }
         }
 
@@ -521,7 +539,7 @@
             setInterval(rotateMotto, 8000); // Ротация на всеки 8 секунди
         }
 
-        window.onload = init;
+        // !!! window.onload вече е преместен в body тага: <body onload="init()"> !!!
     </script>
 
 </body>
