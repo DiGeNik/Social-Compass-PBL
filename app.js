@@ -12,7 +12,7 @@ const MOTTOES = [
 // Секция II: STEM Данни
 // ВАЖНО: Настроено е на 3 минути за лесно тестване. 
 // За финална версия, променете на 40: const CRUSOE_ALARM_THRESHOLD_MINUTES = 40;
-const CRUSOE_ALARM_THRESHOLD_MINUTES = 3; 
+const CRUSOE_ALARM_THRESHOLD_MINUTES = 40; 
 const CORTISOL_CORRECTION = -15; // Корекция на кортизол (-15)
 const ENDORPHIN_CORRECTION = 20; // Корекция на ендорфини (+20)
 
